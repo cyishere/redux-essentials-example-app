@@ -260,3 +260,9 @@ button.reaction-button {
 article {
   margin-bottom: 20px;
 }
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
