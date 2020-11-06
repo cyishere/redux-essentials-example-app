@@ -7,6 +7,13 @@ const initialState = [
     content: "Do NOT run a job in a job!",
     user: "1",
     date: "2020-11-06T01:27:28.176Z",
+    reactions: {
+      thumbsUp: 0,
+      hooray: 0,
+      heart: 0,
+      rocket: 0,
+      eyes: 0,
+    },
   },
   {
     id: "2",
@@ -15,6 +22,13 @@ const initialState = [
       "Three months later, it is the Met's annual ball, and we'll rob it.",
     user: "0",
     date: "2020-11-06T02:27:28.176Z",
+    reactions: {
+      thumbsUp: 0,
+      hooray: 0,
+      heart: 0,
+      rocket: 0,
+      eyes: 0,
+    },
   },
 ];
 
@@ -47,9 +61,17 @@ const postsSlice = createSlice({
         existingPost.content = content;
       }
     },
+    reactionAdded: (state, action) => {
+      const { postId, reaction } = action.payload;
+
+      const existingPost = state.find((post) => post.id === postId);
+      if (existingPost) {
+        existingPost.reactions[reaction]++;
+      }
+    },
   },
 });
 
-export const { postAdded, postUpdated } = postsSlice.actions;
+export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions;
 
 export default postsSlice.reducer;
