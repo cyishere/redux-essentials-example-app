@@ -12,4 +12,4 @@ In the files `postsSlice.js` and `AddPostForm.js`, there're two different approa
 
 ## TO-Dos:
 
-- [ ] How `createEntityAdapter` works?
+- [x] How `createEntityAdapter` works?
