@@ -247,6 +247,7 @@ button.reaction-button {
 .notification {
   border: 1px solid #eee;
   padding: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .notificationsList .notification + .notification {
@@ -265,4 +266,10 @@ article {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.error {
+  border: 1px solid red;
+  color: red;
+  padding: 20px;
 }
