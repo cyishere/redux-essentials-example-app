@@ -8,3 +8,8 @@ In the files `postsSlice.js` and `AddPostForm.js`, there're two different approa
 
 - use memoized selectors by calling `createSelector`;
 - use async/await by calling `createAsyncThunk`;
+- "normalization" - normalized state structure;
+
+## TO-Dos:
+
+- [ ] How `createEntityAdapter` works?
