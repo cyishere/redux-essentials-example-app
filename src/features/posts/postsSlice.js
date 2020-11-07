@@ -1,4 +1,4 @@
-import { createSlice, nanoid, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { client } from "../../api/client";
 
 const initialState = {
@@ -12,26 +12,18 @@ export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
   return response.posts;
 });
 
+export const addNewPost = createAsyncThunk(
+  "posts/addNewPost",
+  async (initialPost) => {
+    const response = await client.post("/fakeApi/posts", { post: initialPost });
+    return response.post;
+  }
+);
+
 const postsSlice = createSlice({
   name: "posts",
   initialState,
   reducers: {
-    postAdded: {
-      reducer: (state, action) => {
-        state.posts.push(action.payload);
-      },
-      prepare: (title, content, userId) => {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            content,
-            user: userId,
-            date: new Date().toISOString(),
-          },
-        };
-      },
-    },
     postUpdated: (state, action) => {
       // action: { type: "posts/postUpdated", payload: { id, title, content } }
       const { id, title, content } = action.payload;
@@ -51,6 +43,9 @@ const postsSlice = createSlice({
     },
   },
   extraReducers: {
+    [addNewPost.fulfilled]: (state, action) => {
+      state.posts.push(action.payload);
+    },
     [fetchPosts.pending]: (state, action) => {
       state.status = "loading";
     },

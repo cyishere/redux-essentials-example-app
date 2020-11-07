@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
 
-import { postAdded } from "../postsSlice";
+import { addNewPost } from "../postsSlice";
 
 const AddPostForm = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [userId, setUserId] = useState("");
+  const [addRequestStatus, setAddRequestStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const dispatch = useDispatch();
 
@@ -16,17 +19,29 @@ const AddPostForm = () => {
   const onContentChanged = (e) => setContent(e.target.value);
   const onAuthorChanged = (e) => setUserId(e.target.value);
 
-  const onSavePostClicked = () => {
-    if (title && content) {
-      dispatch(postAdded(title, content, userId));
+  const canSave =
+    [title, content, userId].every(Boolean) && addRequestStatus === "idle";
 
-      setTitle("");
-      setContent("");
-      setUserId("");
+  const onSavePostClicked = async () => {
+    if (canSave) {
+      try {
+        setAddRequestStatus("pending");
+        const resultAction = await dispatch(
+          addNewPost({ title, content, userId })
+        );
+        unwrapResult(resultAction);
+        setTitle("");
+        setContent("");
+        setUserId("");
+      } catch (error) {
+        setErrorMessage(error.message);
+
+        console.error("Failed to save the post: ", error);
+      } finally {
+        setAddRequestStatus("idle");
+      }
     }
   };
-
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId);
 
   const usersOptions = users.map((user) => (
     <option key={user.id} value={user.id}>
@@ -66,6 +81,8 @@ const AddPostForm = () => {
           Save Post
         </button>
       </form>
+
+      {errorMessage && <div className="error">{errorMessage}</div>}
     </section>
   );
 };

@@ -39,7 +39,7 @@ const PostsList = () => {
             <TimeAgo timestamp={post.date} />
           </p>
 
-          <p>{post.content}</p>
+          <p>{post.content.substring(0, 100) + "..."}</p>
 
           <ReactionButtons post={post} />
 
