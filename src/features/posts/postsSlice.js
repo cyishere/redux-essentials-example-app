@@ -2,14 +2,19 @@ import {
   createSlice,
   createAsyncThunk,
   createSelector,
+  createEntityAdapter,
 } from "@reduxjs/toolkit";
 import { client } from "../../api/client";
 
-const initialState = {
-  posts: [],
+const postsAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+});
+
+// `getInitialState()` returns an empty `{ ids: [], entities: {} }`
+const initialState = postsAdapter.getInitialState({
   status: "idle",
   error: null,
-};
+});
 
 export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
   const response = await client.get("/fakeApi/posts");
@@ -31,7 +36,7 @@ const postsSlice = createSlice({
     postUpdated: (state, action) => {
       // action: { type: "posts/postUpdated", payload: { id, title, content } }
       const { id, title, content } = action.payload;
-      const existingPost = state.posts.find((post) => post.id === id);
+      const existingPost = state.entities[id];
       if (existingPost) {
         existingPost.title = title;
         existingPost.content = content;
@@ -40,22 +45,23 @@ const postsSlice = createSlice({
     reactionAdded: (state, action) => {
       const { postId, reaction } = action.payload;
 
-      const existingPost = state.posts.find((post) => post.id === postId);
+      const existingPost = state.entities[postId];
       if (existingPost) {
         existingPost.reactions[reaction]++;
       }
     },
   },
   extraReducers: {
-    [addNewPost.fulfilled]: (state, action) => {
-      state.posts.push(action.payload);
-    },
+    [addNewPost.fulfilled]: postsAdapter.addOne,
     [fetchPosts.pending]: (state, action) => {
       state.status = "loading";
     },
     [fetchPosts.fulfilled]: (state, action) => {
       state.status = "success";
-      state.posts = state.posts.concat(action.payload);
+
+      // Use the `upsertMany` reducer as a mutating update utility
+      postsAdapter.upsertMany(state, action.payload);
+      // state.posts = state.posts.concat(action.payload);
     },
     [fetchPosts.rejected]: (state, action) => {
       state.status = "failed";
@@ -70,11 +76,14 @@ export default postsSlice.reducer;
 
 // ========
 // Define reusable selectors
-// NOTE: the `state` here is the ROOT state
-export const selectAllPosts = (state) => state.posts.posts;
+// NOTE: the `state` here is the ROOT state, so `getSelectors` needs to return the `posts` from the root state.
 
-export const selectPostById = (state, postId) =>
-  state.posts.posts.find((post) => post.id === postId);
+// Export the customized selectors for this adapter using `getSeletors`
+export const {
+  selectAll: selectAllPosts,
+  selectById: selectPostById,
+  selectIds: selectPostIds,
+} = postsAdapter.getSelectors((state) => state.posts);
 
 export const selectPostsByUser = createSelector(
   [selectAllPosts, (state, userId) => userId],
